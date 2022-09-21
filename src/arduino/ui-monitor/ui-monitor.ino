@@ -88,6 +88,10 @@ class RotaryMonitor {
       poll();
     }
 
+    int rotor_num() {
+      return _a.pin_num();
+    }
+
     int poll() {
       // if neither of the underlying pins has changed state, do nothing
       if (!_a.poll() && !_b.poll()) {
@@ -100,6 +104,13 @@ class RotaryMonitor {
       _oldState = newState;
       return delta;
     }
+
+    void print_debug_info(int motion_direction) {
+      Serial.print("Rotor ");
+      Serial.print(rotor_num());
+      Serial.print(" motion: ");
+      Serial.println(motion_direction);
+    }
 };
 
 #ifdef ROTARY_SHIELD
@@ -110,12 +121,17 @@ PinMonitor pins[] = {
   PinMonitor(4),
 };
 
-#define NUM_PINS (sizeof(pins) / sizeof(pins[0]))
-
 RotaryMonitor rotors[] = {
+  RotaryMonitor(5, 6),
+  RotaryMonitor(7, 8),
+  RotaryMonitor(9, 10),
   RotaryMonitor(11, 12),
+  RotaryMonitor(A0, A1),
+  RotaryMonitor(A2, A3),
+  RotaryMonitor(A4, A5),
 };
 
+#define NUM_PINS (sizeof(pins) / sizeof(pins[0]))
 #define NUM_ROTORS (sizeof(rotors) / sizeof(rotors[0]))
 
 void setup() {
@@ -133,8 +149,7 @@ void loop() {
   for (int i = 0; i < NUM_ROTORS; i++) {
     int motion = rotors[i].poll();
     if (motion) {
-      Serial.print("Rotor motion: ");
-      Serial.println(motion);
+      rotors[i].print_debug_info(motion);
     }
   }
 }
